@@ -1,0 +1,26 @@
+name: Build Swift from Source
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential cmake file git icu-devtools libc++-15-dev libc++abi-15-dev libcurl4-openssl-dev libedit-dev libicu-dev libncurses5-dev libpython3-dev libsqlite3-dev libxml2-dev ninja-build pkg-config python2 python-six python2-dev python3-six python3-pip python3-distutils python3-pkg-resources python3-psutil rsync swig systemtap-sdt-dev tzdata uuid-dev zip
+          sudo snap install --candidate --classic sccache
+
+      - name: Update dependencies
+        run: |
+          utils/update-checkout --clone
+
+      - name: Build Swift
+        run: |
+          utils/build-script --release-debuginfo --sccache
+
+      - name: Start SSH for Debugging
+        uses: mxschmitt/action-tmate@v3
